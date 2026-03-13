@@ -201,6 +201,22 @@ export function Settings() {
             ))}
           </div>
         )}
+        {agentInfo?.flaunchToken && (
+          <div className="mt-4 pt-3 border-t border-zinc-800/50 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mb-0.5">Token</p>
+              <p className="text-[12px] text-zinc-400 font-mono">{agentInfo.flaunchToken.slice(0, 10)}...{agentInfo.flaunchToken.slice(-6)}</p>
+            </div>
+            <a
+              href={`https://flaunch.gg/base/coin/${agentInfo.flaunchToken}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-md text-[11px] font-medium text-zinc-400 bg-zinc-800/70 border border-zinc-700/30 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
+            >
+              View on Flaunch
+            </a>
+          </div>
+        )}
       </Section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

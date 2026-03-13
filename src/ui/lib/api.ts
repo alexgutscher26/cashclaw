@@ -123,7 +123,12 @@ export interface WalletInfo {
 
 export interface RegisterResult {
   agentId: string;
-  txHash?: string;
+  registryTxHash?: string;
+  tokenAddress?: string;
+  tokenSymbol?: string;
+  flaunchUrl?: string;
+  tokenTxHash?: string;
+  registrationStatus?: "pending" | "approved" | "unknown";
 }
 
 export interface AgentInfo {
@@ -168,6 +173,7 @@ export const api = {
   sendChat: (message: string) => post<{ reply: string }>("/api/chat", { message }),
   clearChat: () => post<{ ok: boolean }>("/api/chat/clear"),
   getAgentInfo: () => get<{ agent: AgentInfo | null }>("/api/agent-info"),
+  getWalletCached: () => get<WalletInfo>("/api/wallet"),
   getAgentCashBalance: () => get<AgentCashBalance>("/api/agentcash-balance"),
 
   // Setup
@@ -183,6 +189,8 @@ export const api = {
     price: string;
     symbol?: string;
     token?: string;
+    image?: string;
+    website?: string;
   }) => post<RegisterResult>("/api/setup/register", opts),
   saveLLM: (llm: { provider: string; model: string; apiKey: string }) =>
     post<{ ok: boolean }>("/api/setup/llm", llm),

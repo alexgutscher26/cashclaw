@@ -141,7 +141,7 @@ export function LLMStep({ onNext }: LLMStepProps) {
         disabled={saving || !testPassed}
         className="w-full py-2.5 bg-zinc-100 text-zinc-900 rounded-sm text-[11px] font-mono font-bold tracking-wider hover:bg-white disabled:opacity-40 transition-colors"
       >
-        {saving ? "SAVING..." : "CONTINUE"}
+        {saving ? "SAVING..." : "CONFIGURE DEPLOY"}
       </button>
     </div>
   );

@@ -78,7 +78,16 @@ export function WalletStep({ onNext }: WalletStepProps) {
       </div>
 
       {error && (
-        <div className="panel px-4 py-3 text-[11px] text-red-400 font-mono">{error}</div>
+        <div className="panel px-4 py-3 space-y-2">
+          <p className="text-[11px] text-red-400 font-mono">{error}</p>
+          {error.includes("mltl") && (
+            <div className="text-[10px] text-zinc-500 font-mono space-y-1">
+              <p>Install the Moltlaunch CLI to continue:</p>
+              <code className="block bg-zinc-950 px-2.5 py-1.5 rounded-sm text-zinc-400 border border-red-500/[0.05]">npm install -g @moltlaunch/cli</code>
+              <p className="text-zinc-700">Then refresh this page.</p>
+            </div>
+          )}
+        </div>
       )}
 
       {wallet && (
@@ -89,14 +98,17 @@ export function WalletStep({ onNext }: WalletStepProps) {
               {wallet.address}
             </p>
           </div>
-          {wallet.balance && (
-            <div>
-              <span className="text-[8px] text-zinc-700 font-mono font-bold tracking-[0.2em]">BALANCE</span>
-              <p className="text-lg font-mono font-semibold text-zinc-200 mt-0.5 readout">
-                {wallet.balance} <span className="text-sm text-zinc-600">ETH</span>
+          <div>
+            <span className="text-[8px] text-zinc-700 font-mono font-bold tracking-[0.2em]">BALANCE</span>
+            <p className="text-lg font-mono font-semibold text-zinc-200 mt-0.5 readout">
+              {wallet.balance ?? "0"} <span className="text-sm text-zinc-600">ETH</span>
+            </p>
+            {(!wallet.balance || parseFloat(wallet.balance) < 0.001) && (
+              <p className="text-[10px] text-amber-400/80 font-mono mt-1.5 leading-relaxed">
+                Low balance. Registration and token launch are gasless, but you'll need ETH on Base to claim fees and sign marketplace transactions.
               </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
@@ -141,7 +153,7 @@ export function WalletStep({ onNext }: WalletStepProps) {
             onClick={() => onNext(existingAgent.agentId)}
             className="w-full py-2.5 bg-red-600 text-white rounded-sm text-[11px] font-mono font-bold tracking-wider hover:bg-red-500 transition-colors mt-1"
           >
-            CONTINUE
+            CONNECT LLM
           </button>
         </div>
       )}
@@ -197,7 +209,7 @@ export function WalletStep({ onNext }: WalletStepProps) {
           onClick={() => onNext()}
           className="w-full py-2.5 bg-zinc-100 text-zinc-900 rounded-sm text-[11px] font-mono font-bold tracking-wider hover:bg-white transition-colors"
         >
-          CONTINUE
+          REGISTER AGENT
         </button>
       )}
     </div>

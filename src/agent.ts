@@ -1,5 +1,6 @@
 import http from "node:http";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import {
   loadConfig,
@@ -225,6 +226,10 @@ function handleApi(
       json(res, { ok: true });
       break;
 
+    case "/api/wallet":
+      handleWallet(res, ctx);
+      break;
+
     case "/api/agent-info":
       handleAgentInfo(res, ctx);
       break;
@@ -289,12 +294,35 @@ async function handleSetupApi(
           price: string;
           symbol?: string;
           token?: string;
+          image?: string; // base64 data URL
+          website?: string;
         };
-        const result = await cli.registerAgent(body);
-        // Save agentId to config
-        savePartialConfig({ agentId: result.agentId });
-        ctx.config = loadConfig();
-        json(res, result);
+
+        // If image is a base64 data URL, write to temp file for CLI
+        let imagePath: string | undefined;
+        if (body.image && body.image.startsWith("data:")) {
+          const match = body.image.match(/^data:image\/(\w+);base64,(.+)$/);
+          if (match) {
+            const ext = match[1] === "jpeg" ? "jpg" : match[1];
+            imagePath = path.join(os.tmpdir(), `cashclaw-image-${Date.now()}.${ext}`);
+            fs.writeFileSync(imagePath, Buffer.from(match[2], "base64"));
+          }
+        }
+
+        try {
+          const result = await cli.registerAgent({
+            ...body,
+            image: imagePath,
+          });
+          savePartialConfig({ agentId: result.agentId });
+          ctx.config = loadConfig();
+          json(res, result);
+        } finally {
+          // Clean up temp image
+          if (imagePath && fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        }
         break;
       }
 
@@ -454,7 +482,12 @@ async function handleConfigUpdate(
     // LLM hot-swap: preserve existing apiKey if masked, restart heartbeat
     if (updates.llm) {
       const newLlm = { ...updates.llm };
+      const providerChanged = newLlm.provider !== ctx.config.llm.provider;
       if (newLlm.apiKey === "***") {
+        if (providerChanged) {
+          json(res, { error: "New provider selected — please enter your API key" }, 400);
+          return;
+        }
         newLlm.apiKey = ctx.config.llm.apiKey;
       }
       ctx.config.llm = newLlm;
@@ -473,6 +506,27 @@ async function handleConfigUpdate(
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Invalid request";
     json(res, { error: msg }, 400);
+  }
+}
+
+// Cache wallet info to avoid calling CLI every 3s
+let walletCache: { info: { address: string; balance?: string }; fetchedAt: number } | null = null;
+const WALLET_CACHE_TTL = 60_000; // 1 min
+
+async function handleWallet(
+  res: http.ServerResponse,
+  ctx: ServerContext,
+) {
+  try {
+    const now = Date.now();
+    if (!walletCache || now - walletCache.fetchedAt > WALLET_CACHE_TTL) {
+      const info = await cli.walletShow();
+      walletCache = { info, fetchedAt: now };
+    }
+    json(res, walletCache.info);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    json(res, { error: msg }, 500);
   }
 }
 

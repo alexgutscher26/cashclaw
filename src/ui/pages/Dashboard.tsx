@@ -96,7 +96,7 @@ export function Dashboard() {
           api.getStatus(),
           api.getTasks(),
           api.getStats(),
-          api.getWallet().catch(() => null),
+          api.getWalletCached().catch(() => null),
           api.getKnowledge().catch(() => ({ entries: [] })),
           api.getFeedback().catch(() => ({ entries: [] })),
           api.getConfig().catch(() => null),

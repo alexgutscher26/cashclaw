@@ -69,6 +69,8 @@ export interface RegisterOpts {
   price: string;
   symbol?: string;
   token?: string;
+  image?: string;
+  website?: string;
 }
 
 export async function registerAgent(opts: RegisterOpts): Promise<RegisterResult> {
@@ -84,6 +86,12 @@ export async function registerAgent(opts: RegisterOpts): Promise<RegisterResult>
   }
   if (opts.token) {
     args.push("--token", opts.token);
+  }
+  if (opts.image) {
+    args.push("--image", opts.image);
+  }
+  if (opts.website) {
+    args.push("--website", opts.website);
   }
   return mltl<RegisterResult>(args, REGISTER_TIMEOUT);
 }

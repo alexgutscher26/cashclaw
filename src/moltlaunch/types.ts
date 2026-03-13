@@ -66,7 +66,12 @@ export interface WalletInfo {
 
 export interface RegisterResult {
   agentId: string;
-  txHash?: string;
+  registryTxHash?: string;
+  tokenAddress?: string;
+  tokenSymbol?: string;
+  flaunchUrl?: string;
+  tokenTxHash?: string;
+  registrationStatus?: "pending" | "approved" | "unknown";
 }
 
 export interface Bounty {

@@ -55,7 +55,7 @@ export function App() {
     if (!configured) return;
     function poll() {
       api.getStatus().then(setStatus).catch((err) => console.warn("Status poll failed:", err));
-      api.getWallet().then(setWallet).catch(() => {});
+      api.getWalletCached().then(setWallet).catch(() => {});
     }
     poll();
     const interval = setInterval(poll, 5000);
